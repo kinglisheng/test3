@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fundNetWorth">
+    <resultMap id="fundNetWorthMap" type="com.jxnu.finance.store.entity.fund.FundNetWorth">
+        <result property="fundCode" column="fund_coder"/>
+        <result property="time" column="time"/>
+        <result property="netWorth" column="net_worth"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="java.util.List">
+        INSERT tbl_fund_net_worth(fund_code,time,net_worth,rate) VALUES
+        <foreach collection="list" separator="," item="fundNetWorth">
+            (#{fundNetWorth.fundCode},#{fundNetWorth.time},#{fundNetWorth.netWorth},#{fundNetWorth.rate})
+        </foreach>
+        ON DUPLICATE KEY UPDATE net_worth=VALUES(net_worth),rate=VALUES(rate)
+    </insert>
+
+
+    <select id="selectOne" parameterType="java.util.Map" resultMap="fundNetWorthMap">
+        SELECT
+        *
+        FROM tbl_fund_net_worth
+        <where>
+            <if test="fundCode != null">
+                and fund_code=#{fundCode}
+            </if>
+            <if test="time != null">
+                and time=#{time}
+            </if>
+        </where>
+        ORDER BY time DESC
+        limit 0,1
+    </select>
+
+
+    <select id="selectMulti" parameterType="java.util.Map" resultMap="fundNetWorthMap">
+        SELECT
+        *
+        FROM tbl_fund_net_worth
+        <where>
+            <if test="fundCode !=null and fundCode !=''">
+                and fund_code=#{fundCode}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="queryPeriodMax" resultType="java.lang.Float" parameterType="java.lang.String">
+        SELECT
+        MAX(a.net_worth)
+        FROM
+        `tbl_fund_net_worth` a
+        where a.fund_code=#{fundCode}
+        and NOW() >= a.time
+        and  a.time>= ADDDATE(NOW(),INTERVAL -120 DAY)
+    </select>
+
+    <select id="queryPeriodMin" resultType="java.lang.Float" parameterType="java.lang.String">
+        SELECT
+        MIN(a.net_worth)
+        FROM tbl_fund_net_worth a
+        WHERE a.fund_code=#{fundCode}
+        and now() >= a.time
+        and a.time >= ADDDATE(NOW(),INTERVAL -120 DAY)
+    </select>
+
+
+    <select id="queryWorthByFundCode" parameterType="java.lang.String" resultType="java.lang.Float">
+        SELECT
+        net_worth
+        FROM tbl_fund_net_worth
+        where fund_code=#{fundCode}
+        and time >= date_add(now(), interval -120 day)
+        and now() >= time
+    </select>
+
+</mapper>

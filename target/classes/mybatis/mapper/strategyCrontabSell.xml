@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="strategyCrontabSell">
+    <resultMap id="strategyCrontabSellMap" type="com.jxnu.finance.store.entity.strategy.StrategyCrontabSell">
+        <result property="id" column="id"/>
+        <result property="crontabId" column="crontab_id"/>
+        <result property="time" column="time"/>
+        <result property="share" column="share"/>
+        <result property="netWorth" column="net_worth"/>
+        <result property="amount" column="amount"/>
+        <result property="rate" column="rate"/>
+        <result property="endTime" column="end_time"/>
+    </resultMap>
+
+    <resultMap id="purchaseAnalyzeMap" type="com.jxnu.finance.store.entity.strategy.PurchaseAnalyze">
+        <result property="crontabId" column="crontab_id"/>
+        <result property="fundCode" column="fund_code"/>
+        <result property="fundName" column="fund_name"/>
+        <result property="amountSum" column="amount_sum"/>
+        <result property="shareSum" column="share_sum"/>
+        <result property="num" column="num"/>
+    </resultMap>
+
+    <insert id="insertCrontabShell" parameterType="com.jxnu.finance.store.entity.strategy.StrategyCrontabSell">
+        INSERT into tbl_strategy_crontab_sell
+        (
+         crontab_id,
+         time ,
+         share ,
+         net_worth ,
+         amount ,
+         rate ,
+         end_time
+        ) VALUES
+        (
+         #{crontabId},
+         #{time},
+         #{share},
+         #{netWorth},
+         #{amount},
+         #{rate},
+         #{endTime}
+        )
+    </insert>
+
+    <select id="selectCrontabSellTotal" resultMap="purchaseAnalyzeMap" parameterType="java.lang.String">
+        SELECT
+          crontab_id ,
+          sum(amount) as  amount_sum,
+          sum(share) as share_sum
+        FROM  tbl_strategy_crontab_sell
+        where crontab_id = #{crontabId}
+        GROUP BY crontab_id
+        limit 0,1
+    </select>
+
+    <insert id="insertStandardDeviation" parameterType="java.util.List">
+        insert tbl_fund_standard_deviation
+        (
+        fund_code ,
+        standard_deviation,
+        average,
+        max,
+        min,
+        max_aver_rate,
+        min_aver_rate,
+        max_rate,
+        min_rate,
+        state
+        ) VALUES
+        <foreach collection="list" separator="," item="standardDeviation">
+            (
+            #{standardDeviation.fundCode},
+            #{standardDeviation.standardDeviation},
+            #{standardDeviation.average},
+            #{standardDeviation.max},
+            #{standardDeviation.min},
+            #{standardDeviation.maxAverRate},
+            #{standardDeviation.minAverRate},
+            #{standardDeviation.maxRate},
+            #{standardDeviation.minRate},
+            #{standardDeviation.state}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE standard_deviation=VALUES(standard_deviation),
+        average=VALUES(average),
+        max=VALUES(max),
+        min=VALUES(min),
+        max_rate=VALUES(max_rate),
+        min_rate=VALUES(min_rate),
+        state=VALUES(state)
+    </insert>
+
+
+</mapper>

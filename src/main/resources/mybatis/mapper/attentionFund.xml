@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="attentionFund">
+    <resultMap id="attentionFundMap" type="com.jxnu.finance.store.entity.strategy.AttentionFund">
+        <result property="id" column="id"/>
+        <result property="fundName" column="fund_name"/>
+        <result property="fundCode" column="fund_code"/>
+    </resultMap>
+
+    <resultMap id="makeShareMap" type="com.jxnu.finance.store.entity.fund.FundMakeShare">
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="total" column="total"/>
+    </resultMap>
+
+    <select id="selectMulti" resultMap="attentionFundMap" parameterType="java.util.Map">
+        SELECT
+        *
+        FROM tbl_attention_fund
+        <where>
+            <if test="subject != null and subject !=''">
+                subject = #{subject}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectFundSubject" resultType="java.lang.String">
+        SELECT
+        DISTINCT subject
+        FROM tbl_attention_fund
+    </select>
+
+    <select id="selectSubjectFund" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT
+        DISTINCT fund_code
+        FROM tbl_attention_fund
+        where subject=#{subject}
+    </select>
+
+    <select id="queryFundMakeShare" resultMap="makeShareMap">
+       SELECT
+           b.code,
+           c.name,
+           b.total
+       FROM
+        (
+         SELECT
+           a.code,
+           floor(sum(a.make_share)) total
+           FROM  fund.tbl_fund_order a
+           where a.status=1
+           GROUP BY a.code ) b LEFT JOIN  fund.tbl_fund c
+           ON c.code=b.code
+           WHERE b.total>0
+    </select>
+
+    <select id="queryMaxMakeShare" resultType="java.lang.Integer">
+       SELECT
+         max(b.total)
+       FROM (
+         SELECT
+           a.code,
+           floor(sum(a.make_share)) total
+           FROM  fund.tbl_fund_order a
+         where a.status=1
+         GROUP BY a.code
+       ) b
+    </select>
+</mapper>

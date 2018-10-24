@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="api">
+    <resultMap id="fundRankMap" type="com.jxnu.finance.store.entity.fund.FundRank">
+        <result property="id" column="id"/>
+        <result property="fundCode" column="fund_code"/>
+        <result property="netWorth" column="net_worth"/>
+        <result property="ratio" column="ratio"/>
+        <result property="time" column="time"/>
+    </resultMap>
+
+    <resultMap id="strategyCrontabAnalyzeMap" type="com.jxnu.finance.store.entity.strategy.StrategyCrontabAnalyze">
+        <result property="crontabId" column="crontab_id"/>
+        <result property="fundCode" column="fund_code"/>
+        <result property="fundName" column="fund_name"/>
+        <result property="averNetWorth" column="aver_net_worth"/>
+        <result property="sellNetWorth" column="sell_net_worth"/>
+        <result property="crontabAmount" column="crontab_amount"/>
+        <result property="crontabShare" column="crontab_share"/>
+        <result property="crontabNum" column="crontab_num"/>
+        <result property="rate" column="rate"/>
+        <result property="netWorth" column="net_worth"/>
+        <result property="num" column="num"/>
+    </resultMap>
+
+    <resultMap id="fundIndexMap" type="com.jxnu.finance.store.entity.fund.FundIndex">
+        <result property="code" column="code"/>
+        <result property="time" column="time"/>
+        <result property="name" column="name"/>
+        <result property="latest_price" column="latestPrice"/>
+        <result property="change_amount" column="changeAmount"/>
+        <result property="ratio" column="ratio"/>
+        <result property="turnover" column="turnover"/>
+        <result property="volume" column="volume"/>
+        <result property="yesterday" column="yesterday"/>
+        <result property="today" column="today"/>
+        <result property="max" column="max"/>
+        <result property="min" column="min"/>
+    </resultMap>
+
+    <select id="queryFundRank" resultMap="fundRankMap" >
+        SELECT
+        *
+        FROM tbl_fund_rank
+        ORDER BY time desc
+    </select>
+
+    <select id="queryCrontabAnalyzeList" resultMap="strategyCrontabAnalyzeMap">
+        SELECT
+        *
+        FROM tbl_strategy_crontab_analyze
+        ORDER BY  crontab_id ASC
+    </select>
+
+    <select id="queryFundIndexList" resultMap="fundIndexMap" parameterType="java.util.Map">
+        select * from tbl_fund_index
+        <where>
+            <if test="time != null and time != ''">
+                and time =#{time}
+            </if>
+            <if test="code != null">
+                and code =#{code}
+            </if>
+        </where>
+    </select>
+</mapper>

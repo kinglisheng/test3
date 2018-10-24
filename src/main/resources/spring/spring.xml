@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context.xsd
+                        http://www.springframework.org/schema/mvc
+                        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                        http://www.springframework.org/schema/aop
+                        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="com.jxnu.finance"/>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+    <mvc:annotation-driven/>
+    <context:annotation-config/>
+
+    <bean id="configProperties"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"></property>
+        <property name="locations">
+            <list>
+                <value>config.properties</value>
+                <value>url.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="executorService" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
+        <constructor-arg value="${eventbus.thread}"/>
+        <constructor-arg>
+            <bean class="com.jxnu.finance.crawler.grabThread.FundThreadFactory">
+                <constructor-arg value="eventbus"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean name="eventBus" class="com.google.common.eventbus.AsyncEventBus">
+        <constructor-arg index="0" value="eventBus"/>
+        <constructor-arg index="1" ref="executorService"/>
+    </bean>
+
+    <bean name="kv" class="com.jxnu.finance.httpRest.http.codec.KvCodec"/>
+    <bean name="json" class="com.jxnu.finance.httpRest.http.codec.JsonCodec"/>
+
+    <import resource="spring-database.xml"/>
+
+</beans>
